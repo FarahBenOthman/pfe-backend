@@ -1,117 +1,90 @@
-const dotenv = require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
-const axios = require("axios");
 
-const { createOrder, capturePayment } = require("./api/paypal-api");
+/*const express=require("express");
+const app=express()
+const mongoose=require("mongoose");
+const cors=require("cors");
+const cookieParser=require("cookie-parser");
 
-const userRoute = require("./routes/userRoute");
-const productRoute = require("./routes/productRoute");
-const orderRoute = require("./routes/orderRoute");
-const transactionRoute = require("./routes/transactionRoute");
-const couponRoute = require("./routes/couponRoute");
-const categoryRoute = require("./routes/categoryRoute");
-const brandRoute = require("./routes/brandRoute");
-// const contactRoute = require("./routes/contactRoute");
-const errorHandler = require("./middleware/errorMiddleware");
+/*const dotenv=require("dotenv").config();*/
+/*require("dotenv").config()
 
-const app = express();
-// Middlewares
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://shopito-app.vercel.app"],
-    credentials: true,
-  })
-);
+app.use(express.json())
 
-app.use("/api/transaction", transactionRoute);
-app.use(express.json());
-
-// Routes Middleware
-app.use("/api/users", userRoute);
-app.use("/api/products", productRoute);
-app.use("/api/order", orderRoute);
-app.use("/api/coupon", couponRoute);
-app.use("/api/category", categoryRoute);
-app.use("/api/brand", brandRoute);
-
-// app.use("/api/contactus", contactRoute);
-
-// Routes
+//Routes
 app.get("/", (req, res) => {
-  console.log("Home Page");
-  res.send("Home Page...");
+    res.send("Home Page...");
 });
 
-// FlutterWave Payment verification
-app.get("/response", async (req, res) => {
-  const { transaction_id } = req.query;
 
-  // Confirm transaction
-  const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
 
-  const response = await axios({
-    url,
-    method: "get",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: process.env.FLW_SECRET_KEY,
-    },
-  });
+const PORT = process.env.PORT || 5000
 
-  console.log(response.data.data);
-  const { amount, customer, tx_ref } = response.data.data;
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`)
+        })
+    })
+    .catch((err) => console.log(err));*/
 
-  const successURL =
-    process.env.FRONTEND_URL + "/checkout-flutterwave?payment=successful";
-  const failureURL =
-    process.env.FRONTEND_URL + "/checkout-flutterwave?payment=failed";
-  if (req.query.status === "successful") {
-    res.redirect(successURL);
-  } else {
-    res.redirect(failureURL);
-  }
-});
+const express=require("express")
+const app=express()
 
-// Paypay Payment
-app.post("/my-server/create-paypal-order", async (req, res) => {
-  try {
-    const order = await createOrder(req.body);
-    res.json(order);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
 
-app.post("/my-server/capture-paypal-order", async (req, res) => {
-  const { orderID } = req.body;
-  try {
-    const captureData = await capturePayment(orderID);
-    res.json(captureData);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
+const cors=require("cors");
+const cookieParser=require("cookie-parser"); 
+const bodyParser = require("body-parser");
+
+
+const userRoute=require("./routes/userRoute")
+const productRoute=require("./routes/productRoute")
+const categoryRoute=require("./routes/categoryRoute")
+const brandRoute=require("./routes/brandRoute")
+const orderRoute=require("./routes/orderRoute")
+const errorHandler=require("./middleware/errorMiddleware")
+
+const connectDB=require("./config/connectDB")
+
+
+require("dotenv").config()
+
+connectDB()
+
+
 
 // Error Middleware
-app.use(errorHandler);
-// Connect to DB and start server
-const PORT = process.env.PORT || 5000;
-mongoose
-  .set("strictQuery", false)
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server Running on port ${PORT}`);
-    });
-  })
-  .catch((err) => console.log(err));
+app.use(errorHandler)
+
+
+const PORT = process.env.PORT || 5000
+
+
+//Middlewares
+app.use(express.json())
+app.use(cookieParser())
+app.use(express.urlencoded({ extended: false}));
+app.use(
+    cors(
+        {
+            origin: ["http://localhost:3000"],
+            credentials: true,
+        }
+    )
+)
+app.use(bodyParser.json()); // Ensure body is parsed as JSON
+app.use(bodyParser.urlencoded({ extended: true }));
+//Routes
+
+app.use("/api/users", userRoute);
+app.use("/api/products", productRoute);
+app.use("/api/category", categoryRoute);
+app.use("/api/brand", brandRoute);
+app.use("/api/order", orderRoute);
+
+app.get("/", (req, res) => {
+    res.send("Home Page...")
+})
+
+
+app.listen(PORT, ()=> { console.log("Server is running on Port", + process.env.PORT)})

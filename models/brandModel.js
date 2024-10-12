@@ -1,28 +1,29 @@
-const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Schema;
+const mongoose=require("mongoose");
 
-const brandSchema = new mongoose.Schema(
-  {
+
+
+const brandSchema = mongoose.Schema({
     name: {
-      type: String,
-      trim: true,
-      required: "Name is required",
-      minlength: [2, "Too short"],
-      maxlength: [32, "Too long"],
+        type: String,
+        unique: true,
+        trim: true,
+        required: "Name is required",
+        minlength: [2, "Too short"],
+        maxlength: [32, "Too long"],
     },
     slug: {
-      type: String,
-      unique: true,
-      lowercase: true,
-      index: true,
+        type: String,
+        unique: true,
+        lowercase: true,
+        index: true
     },
     category: {
-      type: String,
-      required: true,
+        type: String,
+        required: true,
     },
-  },
-  { timestamps: true }
-);
+},
+{ timestamps: true}
+)
 
-const Brand = mongoose.model("Brand", brandSchema);
-module.exports = Brand;
+const Brand = mongoose.model("Brand", brandSchema)
+module.exports = Brand

@@ -1,7 +1,7 @@
 
 const express=require("express")
 const router=express.Router()
-const { registerUser, loginUser, logout, getUser, getLoginStatus, updateUser, updatePhoto, saveCart, getCart} = require('../controllers/userController');
+const { registerUser, loginUser, logout, getUser, getLoginStatus, updateUser, updatePhoto, saveCart, getCart,  addToWishlist, removeFromWishlist, getWishlist,} = require('../controllers/userController');
 const { protect } = require("../middleware/authMiddleware");
 
 router.post("/register", registerUser)
@@ -15,6 +15,11 @@ router.patch("/updateUser", protect, updateUser)
 // Cart
 router.get("/getCart", protect, getCart);
 router.patch("/saveCart", protect, saveCart);
+
+// wishlist
+router.post("/addToWishlist", protect, addToWishlist);
+router.get("/getWishlist", protect, getWishlist);
+router.put("/wishlist/:productId", protect, removeFromWishlist);
 
 
 

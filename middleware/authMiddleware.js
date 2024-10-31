@@ -1,50 +1,38 @@
-const asyncHandler=require("express-async-handler");
-const jwt=require("jsonwebtoken");
-const User=require("../models/userModel");
+const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 
-const protect = asyncHandler (async (req, res, next) => {
+const protect = asyncHandler(async (req, res, next) => {
+    const token = req.cookies?.token; // Utiliser l'opérateur "?" pour éviter l'erreur si "cookies" est indéfini
+
+    if (!token) {
+        return res.status(401).json({ message: "Not authorized, please login" });
+    }
 
     try {
-          const token = req.cookies.token
-          if(!token) {
-            res.status(401)
-            throw new Error("Not authorized, please login")
-          }
+        // Verify Token
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(verified.id).select("-password");
 
-          //Verify Token
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET)
-
-    // Get user id from token
-  
-    const user = await User.findById(verified.id).select("-password")
-
-    if(!user){
-        res.status(401)
-        throw new Error("User not found")
-    }
-    req.user = user
-    next()
-
-
-
-
-
+        req.user = user;
+        next();
     } catch (error) {
-        res.status(401)
-        throw new Error("Not authorized, please login");
+        res.status(401).json({ message: "Not authorized, please login" });
     }
-})
+});
 
 // Admin only
-
 const adminOnly = (req, res, next) => {
-    if (req.user && req.user.role === "admin"){
-         next()
+    if (req.user && req.user.role === "admin") {
+        next();
     } else {
-        res.status(401)
-        throw new Error("Not authorized as an admin")
+        res.status(401).json({ message: "Not authorized as an admin" });
     }
-}
+};
 
-module.exports={protect, adminOnly}
+module.exports = { protect, adminOnly };
+

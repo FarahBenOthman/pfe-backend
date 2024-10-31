@@ -40,6 +40,11 @@ const userSchema = mongoose.Schema(
         address: {
             type: Object,
         },
+        wishlist: [{ type: ObjectId, ref: "Product" }],
+        balance: {
+          type: Number,
+          default: 0,
+        },
         cartItems: {
             type:  [Object],
         }

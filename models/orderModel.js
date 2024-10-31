@@ -35,13 +35,13 @@ const orderSchema = mongoose.Schema({
         trim: true,
     },
     cartItems: {
-        type: String,
-       // type: [Object],
+        //type: String,
+        type: [Object],
         required: [true],
-    },
-    shippingAddress: {
-        type: String,
-        //type: [Object],
+      },
+      shippingAddress: {
+        type: Object,
+        //type: String,
         required: true,
     },
     paymentMethod: {
